@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>PANTERA ROSA EN CANVAS</title>
+    <style>
+    	* { padding: 0; 
+    		margin: 0;
+    		background-color:#C0C0C0 }
+    	canvas { background: #2E8B57; display: block; margin: 0 auto;border: double black 5px; }
+    	h1{
+
+    		text-align: center;
+    		color: brown;
+    	}
+
+    	h3{
+
+    		text-align: center;
+    		color: black;
+    	}
+    </style>
+</head>
+<body>
+
+<h1> JUEGO DE PELOTITA VERSION "PAEZ" </h1>
+<h3> CON LA COLABORACION DE BENJA, SOL Y MATEO </h3>
+<br>
+
+
+<audio src="C:\Users\54112\Downloads\despacito.mp3">
+</audio>
+
+<audio src="C:\Users\54112\Downloads\zumba.mp3" controls autoplay loop>
+<p>Tu navegador no implementa el elemento audio</p>
+</audio>
+
+<img src="C:\Users\54112\Desktop\juego1\img\star1.jfif" width="95" height="85">
+<img src="C:\Users\54112\Desktop\juego1\img\star2.jfif" width="95" height="85">
+<img src="C:\Users\54112\Desktop\juego1\img\star3.png" width="95" height="85">
+<canvas id="myCanvas" width="1000" height="440"></canvas>
+
+<script>
+
+
+
+	/*var imagen = new Image();
+		imagen.onload = function(){
+			contexto.drawImage(imagen,0,0);  // imagen completa en la posición (0,0) 
+			contexto.drawImage(imagen,285,0, 150,107); // escalado
+			contexto.drawImage(imagen,130,85,80,60,285,205,150,107); // escalado de una porción
+			contexto.strokeStyle = 'yellow';
+       	contexto.strokeRect (130,85,80,60); // rectángulo amarillo
+		 }
+		  imagen.src = ' 'http:www.aulaclic.es/articulos/graficos/cabeza_pato.png'';*/
+	  
+	
+	var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+var ballRadius = 6;
+var x = canvas.width/2;
+var y = canvas.height-30;
+var dx = 11;
+var dy = -11;
+var paddleHeight = 20;
+var paddleWidth = 150;
+var paddleX = (canvas.width-paddleWidth)/2;
+var rightPressed = false;
+var leftPressed = false;
+var brickRowCount = 18;
+var brickColumnCount = 6;
+var brickWidth = 40;
+var brickHeight = 12;
+var brickPadding = 12;
+var brickOffsetTop = 30;
+var brickOffsetLeft = 30;
+var score = 6000;
+var lives = 10;
+
+var bricks = [];
+for(c=0; c<brickColumnCount; c++) {
+    bricks[c] = [];
+    for(r=0; r<brickRowCount; r++) {
+        bricks[c][r] = { x: 0, y: 0, status: 1 };
+    }
+}
+
+var yoda = new Image();
+yoda.onload = function () {
+context.drawImage(yoda, 100, 100);
+};
+yoda.src = "\img\yoda.jfif";
+
+document.addEventListener("keydown", keyDownHandler, false);
+document.addEventListener("keyup", keyUpHandler, false);
+document.addEventListener("mousemove", mouseMoveHandler, false);
+
+function keyDownHandler(e) {
+    if(e.keyCode == 39) {
+        rightPressed = true;
+    }
+    else if(e.keyCode == 37) {
+        leftPressed = true;
+    }
+}
+function keyUpHandler(e) {
+    if(e.keyCode == 39) {
+        rightPressed = false;
+    }
+    else if(e.keyCode == 37) {
+        leftPressed = false;
+    }
+}
+function mouseMoveHandler(e) {
+    var relativeX = e.clientX - canvas.offsetLeft;
+    if(relativeX > 0 && relativeX < canvas.width) {
+        paddleX = relativeX - paddleWidth/2;
+    }
+}
+function collisionDetection() {
+    for(c=0; c<brickColumnCount; c++) {
+        for(r=0; r<brickRowCount; r++) {
+            var b = bricks[c][r];
+            if(b.status == 1) {
+                if(x > b.x && x < b.x+brickWidth && y > b.y && y < b.y+brickHeight) {
+                    dy = -dy;
+                    b.status = 0;
+                    score++;
+                    if(score == brickRowCount*brickColumnCount) {
+                        alert("HAS GANADO, FELICITACIONES!!!");
+                        //document.location.reload();
+                        window.location="nivel8.html";
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+function drawBall() {
+    ctx.beginPath();
+    ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+    ctx.fillStyle = "orange";
+    ctx.fill();
+    ctx.closePath();
+}
+function drawPaddle() {
+    ctx.beginPath();
+    ctx.rect(paddleX, canvas.height-paddleHeight, paddleWidth, paddleHeight);
+    ctx.fillStyle = "yellow";
+    ctx.fill();
+    ctx.closePath();
+}
+function drawBricks() {
+    for(c=0; c<brickColumnCount; c++) {
+        for(r=0; r<brickRowCount; r++) {
+            if(bricks[c][r].status == 1) {
+                var brickX = (r*(brickWidth+brickPadding))+brickOffsetLeft;
+                var brickY = (c*(brickHeight+brickPadding))+brickOffsetTop;
+                bricks[c][r].x = brickX;
+                bricks[c][r].y = brickY;
+                ctx.beginPath();
+                ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                ctx.fillStyle = "brown";
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+    }
+}
+function drawScore() {
+    ctx.font = "22px Arial";
+    ctx.fillStyle = "blue";
+    ctx.fillText("PUNTAJE: "+score, 8, 20);
+}
+function drawLives() {
+    ctx.font = "22px Arial";
+    ctx.fillStyle = "blue";
+    ctx.fillText("VIDAS: "+lives, canvas.width-100, 20);
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawBricks();
+    drawBall();
+    drawPaddle();
+    drawScore();
+    drawLives();
+    collisionDetection();
+
+
+
+    /* imagen*/
+
+    
+    if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
+        dx = -dx;
+    }
+    if(y + dy < ballRadius) {
+        dy = -dy;
+    }
+    else if(y + dy > canvas.height-ballRadius) {
+        if(x > paddleX && x < paddleX + paddleWidth) {
+            dy = -dy;
+        }
+        else {
+            lives--;
+            if(!lives) {
+                alert("HAS PERDIDO, MACRI GATO!!!");
+                document.location.reload();
+                window.location="juego.html";
+            }
+            else {
+                x = canvas.width/2;
+                y = canvas.height-30;
+                dx = 11;
+                dy = -11;
+                paddleX = (canvas.width-paddleWidth)/2;
+            }
+        }
+    }
+    
+    if(rightPressed && paddleX < canvas.width-paddleWidth) {
+        paddleX += 7;
+    }
+    else if(leftPressed && paddleX > 0) {
+        paddleX -= 7;
+    }
+    
+    x += dx;
+    y += dy;
+    requestAnimationFrame(draw);
+}
+
+draw();
+
+</script>
+
+
+</body>
+</html>
+
+
+
